@@ -7,21 +7,26 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.AzureAppServices;
 
 namespace aspnet_core_dotnet_core.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IConfiguration configuration;
+        private ILogger<HomeController> _logger;
 
-        public HomeController(IConfiguration config)
+        public HomeController(IConfiguration config, ILogger<HomeController> logger)
         {
             this.configuration = config;
+            _logger = logger;
         }
 
         public IActionResult Index()
         {
             List<Class1> ObjCustomer = new List<Class1>();
+            _logger.LogInformation("[LOG]: Calling the Index action");
             try
             {
                 String constring = configuration.GetConnectionString("DefaultConnection");
@@ -34,13 +39,12 @@ namespace aspnet_core_dotnet_core.Controllers
 
 
                     ObjCustomer = Submit_6_Tsql_SelectEmployees(connection);
-
-
                 }
             }
-            catch (SqlException e)
+            catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError("[EXCEPTION]: " + e.ToString());
+//                Console.WriteLine(e.ToString());
             }
 
             return View(ObjCustomer.ToList());
@@ -174,9 +178,9 @@ namespace aspnet_core_dotnet_core.Controllers
                        Build_3_Tsql_Inserts("contact"));
                 }
             }
-            catch (SqlException e)
+            catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError("[EXCEPTION]: " + e.ToString());
             }
 
 
